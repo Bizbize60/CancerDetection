@@ -1,0 +1,35 @@
+=== TEST RESULTS ===
+Test size: 704
+
+ROC-AUC: 0.7657  (threshold-bagimsiz genel performans)
+
+Threshold secimi val set uzerinde yapildi (test leakage yok).
+
+--- Default 0.5 (threshold=0.500) ---
+  Sensitivity: 0.6993  (kanseri yakalama)
+  Specificity: 0.6589
+  Precision:   0.5693
+  F1:          0.6276
+  Confusion: TN=282 FP=146 FN=83 TP=193
+  FN (kaçırılan kanser): 83
+--- Youden J (max sens+spec-1) (threshold=0.442) ---
+  Sensitivity: 0.7609  (kanseri yakalama)
+  Specificity: 0.6005
+  Precision:   0.5512
+  F1:          0.6393
+  Confusion: TN=257 FP=171 FN=66 TP=210
+  FN (kaçırılan kanser): 66
+--- Klinik oncelik: Sensitivity >= 0.90 (threshold=0.301) ---
+  Sensitivity: 0.8659  (kanseri yakalama)
+  Specificity: 0.4322
+  Precision:   0.4959
+  F1:          0.6306
+  Confusion: TN=185 FP=243 FN=37 TP=239
+  FN (kaçırılan kanser): 37
+--- Klinik oncelik: Sensitivity >= 0.95 (threshold=0.151) ---
+  Sensitivity: 0.9457  (kanseri yakalama)
+  Specificity: 0.2593
+  Precision:   0.4516
+  F1:          0.6112
+  Confusion: TN=111 FP=317 FN=15 TP=261
+  FN (kaçırılan kanser): 15
