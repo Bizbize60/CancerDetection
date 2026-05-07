@@ -1,7 +1,7 @@
 """
 MammographyDataset — görüntü + tabular veriyi birlikte döndürür.
 
-CSV'de şu kolonlar beklenir (prepare_splits.py tarafından üretilir):
+CSV'de şu kolonlar beklenir (prepare_splits.py tarafindan üretilir):
   image_path, label, left_or_right_breast, image_view,
   mass_shape, mass_margins, abnormality_type,
   breast_density, assessment, subtlety, abnormality_id
