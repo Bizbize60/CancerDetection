@@ -40,15 +40,23 @@ SEED = 42
 # --- Training ---
 BATCH_SIZE = 16
 NUM_WORKERS = 4
-EPOCHS = 35
-LR = 1e-4
+EPOCHS = 50
+LR = 3e-5
 WEIGHT_DECAY = 1e-4
-DROPOUT = 0.5
-PATIENCE = 8
+DROPOUT = 0.4
+PATIENCE = 10
+RADIMAGENET_WEIGHTS = r"C:\Users\PC\Desktop\Dataset\RadImageNet-ResNet50_notop.h5"
+LABEL_SMOOTHING = 0.1   # 1.0 → 0.9, 0.0 → 0.1
+MIXUP_ALPHA     = 0.4   # beta dağılımı parametresi
+N_FOLDS         = 5 
+LABEL_SMOOTHING = 0.1 
+MIXUP_ALPHA     = 0.4
+ 
+ 
 
 # Two-stage fine-tuning
-WARMUP_EPOCHS = 3        # ilk 3 epoch backbone donuk, sadece head eğitilir
-HEAD_LR = 1e-3           # warmup sırasında head learning rate
+WARMUP_EPOCHS = 5        # ilk 3 epoch backbone donuk, sadece head eğitilir
+HEAD_LR = 5e-4           # warmup sırasında head learning rate
 
 # --- Device ---
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
