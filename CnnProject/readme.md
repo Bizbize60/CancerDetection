@@ -34,6 +34,15 @@ python evaluate.py
 Beklenen baseline: Val AUC ~0.75-0.82, Test AUC ~0.72-0.80.
 
 -------------------------------
+# UI KISMINI DENEMEK İÇİN (geçici)
+
+# 1) cd static
+
+# 2) python -m http.server 8000
+
+# 3) Browser aç ve şuraya git: http://localhost:8000
+
+-------------------------------
 # GÜNCELLENMİŞ HALİ
 
 # 1) Script izin ver (virtual env kurduktan sonra- kuruluysa devam)

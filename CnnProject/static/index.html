@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid Breast Cancer Classification System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        medical: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Header Section -->
+    <header class="bg-white shadow-sm border-b border-slate-200 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="absolute top-0 right-4 sm:right-6 lg:right-8 bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-amber-200">
+                Research Use Only – Not a Medical Diagnosis
+            </div>
+            <div class="flex items-center gap-4 mt-2">
+                <div class="w-12 h-12 bg-medical-500 rounded-lg flex items-center justify-center text-white text-2xl shadow-md">
+                    <i class="fa-solid fa-notes-medical"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Hybrid Breast Cancer Classification System</h1>
+                    <p class="text-sm text-slate-500 mt-1">Mammography Image + CSV-based Clinical Metadata AI Decision Support</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Column: Inputs -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Model Mode Selection -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-medical-500"></i> Model Mode Selection
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="modelMode" value="image" class="peer sr-only">
+                            <div class="p-4 rounded-lg border-2 border-slate-200 peer-checked:border-medical-500 peer-checked:bg-medical-50 hover:bg-slate-50 transition-all text-center">
+                                <i class="fa-solid fa-image text-slate-400 peer-checked:text-medical-500 text-xl mb-2 block"></i>
+                                <span class="text-sm font-medium text-slate-700 peer-checked:text-medical-700">Image Only</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="modelMode" value="tabular" class="peer sr-only">
+                            <div class="p-4 rounded-lg border-2 border-slate-200 peer-checked:border-medical-500 peer-checked:bg-medical-50 hover:bg-slate-50 transition-all text-center">
+                                <i class="fa-solid fa-table text-slate-400 peer-checked:text-medical-500 text-xl mb-2 block"></i>
+                                <span class="text-sm font-medium text-slate-700 peer-checked:text-medical-700">Tabular CSV Only</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="modelMode" value="fused" class="peer sr-only" checked>
+                            <div class="p-4 rounded-lg border-2 border-slate-200 peer-checked:border-medical-500 peer-checked:bg-medical-50 hover:bg-slate-50 transition-all text-center">
+                                <i class="fa-solid fa-layer-group text-slate-400 peer-checked:text-medical-500 text-xl mb-2 block"></i>
+                                <span class="text-sm font-medium text-slate-700 peer-checked:text-medical-700">Image + Tabular Fusion</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Form wrapper -->
+                <form id="predictionForm" class="space-y-6">
+                    
+                    <!-- Image Upload Section -->
+                    <div id="imageUploadSection" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-all duration-300">
+                        <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-x-ray text-medical-500"></i> Mammography Image
+                        </h2>
+                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-medical-400 transition-colors cursor-pointer bg-slate-50" id="imageDropZone" tabindex="0">
+                            <input type="file" id="imageInput" accept="image/png, image/jpeg" class="hidden">
+                            <div id="imageUploadContent">
+                                <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-400 mb-3"></i>
+                                <p class="text-sm text-slate-600 font-medium">Click to select or drag & drop</p>
+                                <p class="text-xs text-slate-400 mt-1">PNG, JPEG (Max: 5MB)</p>
+                            </div>
+                            <div id="imagePreviewContainer" class="hidden flex flex-col items-center">
+                                <div class="relative w-full max-w-[200px] aspect-[4/5] bg-black rounded-lg overflow-hidden shadow-inner mb-3">
+                                    <img id="imagePreview" class="w-full h-full object-cover opacity-90 grayscale mix-blend-screen" alt="Mammography preview">
+                                </div>
+                                <div class="flex items-center justify-between w-full max-w-[250px] bg-white p-2 rounded border border-slate-200 shadow-sm">
+                                    <div class="flex flex-col text-left overflow-hidden">
+                                        <span id="imageFileName" class="text-xs font-medium text-slate-700 truncate w-32">filename.png</span>
+                                        <span id="imageFileSize" class="text-xs text-slate-500">0 KB</span>
+                                    </div>
+                                    <button type="button" id="removeImageBtn" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded transition-colors" title="Remove file">
+                                        <i class="fa-solid fa-trash-can text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CSV Upload Section -->
+                    <div id="csvUploadSection" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-all duration-300">
+                        <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-file-csv text-medical-500"></i> Clinical Metadata (CSV)
+                        </h2>
+                        
+                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-medical-400 transition-colors cursor-pointer bg-slate-50 mb-4" id="csvDropZone" tabindex="0">
+                            <input type="file" id="csvInput" accept=".csv" class="hidden">
+                            <div id="csvUploadContent">
+                                <i class="fa-solid fa-file-arrow-up text-4xl text-slate-400 mb-3"></i>
+                                <p class="text-sm text-slate-600 font-medium">Click to select or drag & drop</p>
+                                <p class="text-xs text-slate-400 mt-1">CSV files only</p>
+                            </div>
+                            
+                            <!-- Uploaded CSV Info -->
+                            <div id="csvFileInfoContainer" class="hidden items-center justify-between w-full max-w-sm mx-auto bg-white p-3 rounded border border-slate-200 shadow-sm">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <div class="text-green-500 bg-green-50 p-2 rounded">
+                                        <i class="fa-solid fa-file-csv text-xl"></i>
+                                    </div>
+                                    <div class="flex flex-col text-left overflow-hidden">
+                                        <span id="csvFileName" class="text-sm font-medium text-slate-700 truncate w-48">data.csv</span>
+                                        <span id="csvFileSize" class="text-xs text-slate-500">0 KB</span>
+                                    </div>
+                                </div>
+                                <button type="button" id="removeCsvBtn" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded transition-colors" title="Remove file">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CSV Preview Table -->
+                        <div id="csvPreviewContainer" class="hidden mt-4">
+                            <h3 class="text-sm font-medium text-slate-700 mb-2">CSV Preview</h3>
+                            <div class="overflow-x-auto border border-slate-200 rounded-lg shadow-sm">
+                                <table class="w-full text-left text-xs text-slate-600 whitespace-nowrap" id="csvPreviewTable">
+                                    <thead class="text-xs text-slate-700 bg-slate-50 border-b border-slate-200" id="csvPreviewHead">
+                                    </thead>
+                                    <tbody id="csvPreviewBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="csvRowCountInfo" class="mt-2 text-xs text-amber-600 font-medium hidden flex items-center gap-1">
+                                <i class="fa-solid fa-circle-info"></i> Multiple rows detected. The API may return batch predictions if supported.
+                            </div>
+                            <div id="csvErrorMsg" class="mt-2 text-xs text-red-500 hidden flex items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation"></i> Could not read CSV file properly.
+                            </div>
+                        </div>
+
+                        <!-- Expected Format Card -->
+                        <div class="mt-6 bg-blue-50 rounded-lg p-4 border border-blue-100">
+                            <h3 class="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-circle-info text-blue-500"></i> Expected CSV Columns
+                            </h3>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <span class="px-2 py-1 bg-white text-blue-800 text-xs rounded border border-blue-200 shadow-sm font-mono">left_or_right_breast</span>
+                                <span class="px-2 py-1 bg-white text-blue-800 text-xs rounded border border-blue-200 shadow-sm font-mono">image_view</span>
+                                <span class="px-2 py-1 bg-white text-blue-800 text-xs rounded border border-blue-200 shadow-sm font-mono">abnormality_type</span>
+                                <span class="px-2 py-1 bg-white text-blue-800 text-xs rounded border border-blue-200 shadow-sm font-mono">mass_shape</span>
+                                <span class="px-2 py-1 bg-white text-blue-800 text-xs rounded border border-blue-200 shadow-sm font-mono">mass_margins</span>
+                                <span class="px-2 py-1 bg-white text-blue-800 text-xs rounded border border-blue-200 shadow-sm font-mono">calc_type</span>
+                                <span class="px-2 py-1 bg-white text-blue-800 text-xs rounded border border-blue-200 shadow-sm font-mono">calc_distribution</span>
+                                <span class="px-2 py-1 bg-white text-blue-800 text-xs rounded border border-blue-200 shadow-sm font-mono">breast_density</span>
+                                <span class="px-2 py-1 bg-white text-blue-800 text-xs rounded border border-blue-200 shadow-sm font-mono">abnormality_id</span>
+                            </div>
+                            <p class="text-xs text-blue-800/80">
+                                The CSV file should include the clinical/tabular metadata columns used by the trained model. The backend will process the selected row or batch depending on the API implementation.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Predict Button -->
+                    <div class="pt-2">
+                        <button type="submit" id="predictBtn" class="w-full bg-medical-600 hover:bg-medical-700 text-white font-semibold py-4 px-6 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 disabled:bg-slate-300 disabled:cursor-not-allowed text-lg">
+                            <span id="btnText">Run AI Prediction</span>
+                            <i id="btnIcon" class="fa-solid fa-wand-magic-sparkles"></i>
+                            <div id="btnSpinner" class="hidden">
+                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                        </button>
+                        <div id="formErrorMsg" class="mt-3 text-sm text-red-500 font-medium text-center hidden"></div>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Right Column: Results & Info -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <!-- Result Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col h-auto min-h-[350px]">
+                    <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <i class="fa-solid fa-square-poll-vertical text-medical-500"></i> AI Prediction Result
+                    </h2>
+                    
+                    <!-- Empty State -->
+                    <div id="resultEmptyState" class="flex flex-col items-center justify-center flex-grow py-8 text-center">
+                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                            <i class="fa-solid fa-microscope text-3xl"></i>
+                        </div>
+                        <h3 class="text-slate-600 font-medium mb-1">No prediction yet</h3>
+                        <p class="text-sm text-slate-400 max-w-xs">Upload the required image and/or CSV data, then run the model to see AI-assisted risk estimation.</p>
+                    </div>
+
+                    <!-- Single Result Content -->
+                    <div id="resultContent" class="hidden flex-col h-full fade-in">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <p class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Predicted Class</p>
+                                <h3 class="text-2xl font-bold text-slate-800" id="resPredictedClass">Malignant Risk</h3>
+                            </div>
+                            <div class="px-3 py-1 rounded-full text-sm font-semibold border shadow-sm" id="resRiskBadge">
+                                High
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="flex justify-between text-sm mb-1.5">
+                                <span class="text-slate-600 font-medium">Malignancy Probability</span>
+                                <span class="font-bold text-slate-800" id="resProbabilityText">0.00%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
+                                <div class="h-2.5 rounded-full transition-all duration-1000 ease-out" id="resProgressBar" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-slate-400 mt-1.5">
+                                <span>Benign</span>
+                                <span>Threshold: <span id="resThreshold">0.5</span></span>
+                                <span>Malignant</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-100 mb-6">
+                            <p class="text-sm text-slate-700 italic" id="resInterpretation">
+                                The model predicts elevated malignancy risk. This result is not a medical diagnosis and should be reviewed by a medical professional.
+                            </p>
+                        </div>
+                        
+                        <div class="mt-auto pt-4 border-t border-slate-100">
+                            <div class="flex items-start gap-2 text-xs text-slate-500">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+                                <p>This AI result is for research and decision-support purposes only. It must not be used as a standalone medical diagnosis.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Batch Result Content -->
+                    <div id="batchResultContent" class="hidden flex-col h-full fade-in">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-bold text-slate-800">Batch Predictions</h3>
+                            <p class="text-sm text-slate-500" id="batchCountSummary">0 rows processed</p>
+                        </div>
+                        
+                        <div class="overflow-y-auto max-h-[300px] border border-slate-200 rounded-lg shadow-sm mb-4">
+                            <table class="w-full text-left text-sm text-slate-600">
+                                <thead class="text-xs text-slate-700 bg-slate-50 border-b border-slate-200 sticky top-0">
+                                    <tr>
+                                        <th class="px-3 py-2">Row ID</th>
+                                        <th class="px-3 py-2">Probability</th>
+                                        <th class="px-3 py-2">Predicted Class</th>
+                                        <th class="px-3 py-2 text-center">Risk Level</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="batchResultBody" class="divide-y divide-slate-100">
+                                    <!-- Rows generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-auto pt-3 border-t border-slate-100">
+                            <div class="flex items-start gap-2 text-xs text-slate-500">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+                                <p id="batchDisclaimer">This AI result is for research and decision-support purposes only. It must not be used as a standalone medical diagnosis.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model Info Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h2 class="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2 border-b border-slate-100 pb-2">
+                        <i class="fa-solid fa-network-wired text-medical-500"></i> Model Information
+                    </h2>
+                    <ul class="text-sm text-slate-600 space-y-2">
+                        <li class="flex justify-between"><span class="font-medium text-slate-500">Project Type:</span> <span id="infoType">Hybrid Deep Learning</span></li>
+                        <li class="flex justify-between"><span class="font-medium text-slate-500">Image Branch:</span> <span id="infoImage">ResNet50 + Spatial Attention</span></li>
+                        <li class="flex justify-between"><span class="font-medium text-slate-500">Tabular Branch:</span> <span id="infoTabular">CSV Metadata + Embedding + MLP</span></li>
+                        <li class="flex justify-between"><span class="font-medium text-slate-500">Fusion Strategy:</span> <span id="infoFusion">Intermediate Feature Fusion</span></li>
+                        <li class="flex justify-between"><span class="font-medium text-slate-500">Output:</span> <span id="infoOutput">Binary Malignancy Risk</span></li>
+                        <li class="flex justify-between"><span class="font-medium text-slate-500">Input Image Size:</span> <span id="infoSize">384 x 384</span></li>
+                        <li class="flex justify-between"><span class="font-medium text-slate-500">Tabular Input:</span> <span id="infoTabIn">CSV File</span></li>
+                    </ul>
+                </div>
+
+                <!-- Technical Details Accordion -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <button type="button" class="w-full px-6 py-4 flex items-center justify-between text-left focus:outline-none" id="accordionBtn">
+                        <h2 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-code text-medical-500"></i> Technical Details
+                        </h2>
+                        <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300" id="accordionIcon"></i>
+                    </button>
+                    <div class="hidden px-6 pb-4 pt-0 text-xs text-slate-600 border-t border-slate-100 bg-slate-50" id="accordionContent">
+                        <ul class="space-y-1.5 mt-3 list-disc list-inside">
+                            <li><span class="font-medium text-slate-700">Active Mode:</span> <span id="techActiveMode">Fused</span></li>
+                            <li><span class="font-medium text-slate-700">API Endpoint:</span> /api/predict</li>
+                            <li><span class="font-medium text-slate-700">Image input:</span> PNG/JPEG mammography image</li>
+                            <li><span class="font-medium text-slate-700">Tabular input:</span> CSV file</li>
+                            <li><span class="font-medium text-slate-700">Image preprocessing:</span> Resize, normalize, grayscale-to-RGB</li>
+                            <li><span class="font-medium text-slate-700">CSV processing:</span> backend-side metadata preprocessing</li>
+                            <li><span class="font-medium text-slate-700">Threshold:</span> 0.5</li>
+                            <li><span class="font-medium text-slate-700">Output:</span> Sigmoid probability</li>
+                            <li><span class="font-medium text-slate-700">Intended Use:</span> Academic research and AI-assisted decision support</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 text-center mt-auto">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="font-medium text-slate-300">Graduation Project – Computer Engineering</p>
+            <p class="text-xs mt-1">Hybrid CNN + MLP Breast Cancer Classification Interface</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
