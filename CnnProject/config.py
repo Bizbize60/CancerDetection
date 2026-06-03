@@ -26,7 +26,7 @@ USE_IMAGE_TYPE = "cropped"
 #   "tabular" → sadece MLP (kategorik + sayısal özellikler)
 #   "fused"   → image + tabular intermediate fusion (varsayılan)
 # ============================================================
-MODE = "fused"
+MODE = "tabular"
 
 # Checkpoint dosya isimleri mode'a göre ayrılır → modeller birbirini ezmesin
 CHECKPOINT_NAME = f"best_{MODE}.pt"

@@ -25,25 +25,44 @@
         }
     </script>
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
     <!-- Header Section -->
-    <header class="bg-white shadow-sm border-b border-slate-200 py-6">
+    <header class="bg-white shadow-sm border-b border-slate-200 py-7 min-h-[112px] relative overflow-hidden">
+
+        <!-- Left Brand Logo Area -->
+        <div class="absolute left-4 sm:left-6 lg:left-8 top-1/2 -translate-y-1/2 hidden xl:flex items-center gap-3">
+            <img 
+                src="/static/assets/mammofusion-icon.png" 
+                alt="MammoFusion Icon" 
+                class="h-24 w-24 object-contain"
+            >
+
+            <img 
+                src="/static/assets/mammofusion-wordmark.png" 
+                alt="MammoFusion Wordmark" 
+                class="h-[72px] w-auto max-w-[260px] object-contain"
+            >
+        </div>
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="absolute top-0 right-4 sm:right-6 lg:right-8 bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-amber-200">
                 Research Use Only – Not a Medical Diagnosis
             </div>
+
             <div class="flex items-center gap-4 mt-2">
-                <div class="w-12 h-12 bg-medical-500 rounded-lg flex items-center justify-center text-white text-2xl shadow-md">
-                    <i class="fa-solid fa-notes-medical"></i>
-                </div>
+
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Hybrid Breast Cancer Classification System</h1>
-                    <p class="text-sm text-slate-500 mt-1">Mammography Image + CSV-based Clinical Metadata AI Decision Support</p>
+                    <h1 class="text-3xl font-bold text-slate-900">
+                        Hybrid Breast Cancer Classification System
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-1">
+                        Mammography Image + CSV-based Clinical Metadata AI Decision Support
+                    </p>
                 </div>
             </div>
         </div>
@@ -113,6 +132,86 @@
                                     <button type="button" id="removeImageBtn" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded transition-colors" title="Remove file">
                                         <i class="fa-solid fa-trash-can text-sm"></i>
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Spatial Attention Heatmap Section -->
+                    <div id="spatialHeatmapSection" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-all duration-300">
+                        <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-fire text-medical-500"></i> Spatial Attention Heatmap / GRAD-CAM
+                        </h2>
+                        <p class="text-sm text-slate-500 mb-4">Visual explanation of the image regions emphasized by the model.</p>
+                        
+                        <!-- Empty State -->
+                        <div id="heatmapEmptyState" class="flex flex-col items-center justify-center py-6 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+                            <i class="fa-solid fa-eye-slash text-3xl text-slate-300 mb-2"></i>
+                            <h3 class="text-slate-600 font-medium text-sm">No heatmap or grad-cam generated yet</h3>
+                            <p class="text-xs text-slate-400 mt-1">Run an image-based prediction to visualize the model’s spatial attention and grad-cam.</p>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="heatmapLoadingState" class="hidden flex-col items-center justify-center py-8 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+                            <svg class="animate-spin h-8 w-8 text-medical-500 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <p class="text-sm text-slate-600 font-medium">Generating attention heatmap...</p>
+                        </div>
+
+                        <!-- Missing Message -->
+                        <div id="heatmapMissingMessage" class="hidden flex-col items-center justify-center py-6 text-center border border-slate-200 rounded-xl bg-slate-50">
+                            <i class="fa-solid fa-circle-exclamation text-amber-500 text-2xl mb-2"></i>
+                            <p class="text-sm text-slate-600">Heatmap output was not returned by the API.</p>
+                        </div>
+
+                        <!-- Result Content -->
+                        <div id="heatmapResultContent" class="hidden flex-col lg:flex-row gap-4 relative">
+                            <!-- Demo Badge -->
+                            <div id="heatmapDemoBadge" class="hidden absolute top-2 right-2 z-10 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide shadow-md">
+                                Demo Heatmap
+                            </div>
+
+                            <!-- Original Image -->
+                            <div class="flex-1 flex flex-col items-center">
+                                <p class="text-xs text-slate-500 font-medium mb-2 text-center w-full">Original Mammography</p>
+                                <div class="w-full bg-slate-950 rounded-lg p-1 border border-slate-200 shadow-inner flex items-center justify-center aspect-[4/5] max-h-[300px]">
+                                    <img id="heatmapOriginalImage" class="max-w-full max-h-full object-contain rounded" alt="Original mammography image">
+                                </div>
+                            </div>
+
+                            <!-- Heatmap Overlay with Tab Toggle -->
+                            <div class="flex-1 flex flex-col items-center">
+                                <!-- Tab buttons -->
+                                <div class="flex gap-1 mb-2 bg-slate-100 rounded-lg p-0.5 w-full">
+                                    <button type="button" id="tabGradCam" class="heatmap-tab-active flex-1 text-xs font-semibold py-1 px-2 rounded-md transition-all duration-200 border-0 cursor-pointer">
+                                        Grad-CAM
+                                    </button>
+                                    <button type="button" id="tabSpatial" class="heatmap-tab-inactive flex-1 text-xs font-semibold py-1 px-2 rounded-md transition-all duration-200 border-0 cursor-pointer">
+                                        Spatial Attention
+                                    </button>
+                                </div>
+                                <!-- Image container -->
+                                <div class="w-full bg-slate-950 rounded-lg p-1 border border-slate-200 shadow-inner flex items-center justify-center aspect-[4/5] max-h-[300px] relative overflow-hidden" id="heatmapOverlayContainer">
+                                    <img id="heatmapOverlayImage" class="max-w-full max-h-full object-contain rounded" alt="Grad-CAM attention heatmap">
+                                    <img id="heatmapSpatialImage" class="hidden max-w-full max-h-full object-contain rounded" alt="Spatial attention heatmap">
+                                    <div id="heatmapMockOverlay" class="hidden absolute inset-0 mock-heatmap-overlay rounded pointer-events-none"></div>
+                                </div>
+                            </div>
+
+                            <!-- Attention Legend -->
+                            <div class="flex flex-row lg:flex-col items-center lg:w-12 pt-4 lg:pt-0">
+                                <p class="text-[10px] text-slate-500 font-medium mb-1 lg:mb-2 text-center w-full whitespace-nowrap lg:whitespace-normal">Weight</p>
+                                <div class="flex flex-row lg:flex-col items-center h-3 lg:h-full w-full lg:w-4 heatmap-gradient rounded-full shadow-inner border border-slate-200 order-2 lg:order-none"></div>
+                                <div class="flex flex-row lg:flex-col justify-between h-full text-[10px] text-slate-500 font-mono font-medium ml-0 lg:ml-1 mt-1 lg:mt-0 w-full lg:w-auto order-1 lg:order-none px-2 lg:px-0 py-0 lg:py-2">
+                                    <span>1.0</span>
+                                    <span class="hidden lg:inline">0.8</span>
+                                    <span class="hidden lg:inline">0.6</span>
+                                    <span>0.5</span>
+                                    <span class="hidden lg:inline">0.4</span>
+                                    <span class="hidden lg:inline">0.2</span>
+                                    <span>0.0</span>
                                 </div>
                             </div>
                         </div>
@@ -346,10 +445,10 @@
     <footer class="bg-slate-900 text-slate-400 py-6 text-center mt-auto">
         <div class="max-w-7xl mx-auto px-4">
             <p class="font-medium text-slate-300">Graduation Project – Computer Engineering</p>
-            <p class="text-xs mt-1">Hybrid CNN + MLP Breast Cancer Classification Interface</p>
+            <p class="text-xs mt-1">Hybrid CNN + MLP Breast Cancer Classification</p>
         </div>
     </footer>
 
-    <script src="app.js"></script>
+    <script src="/static/app.js"></script>
 </body>
 </html>
