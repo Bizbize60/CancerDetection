@@ -34,13 +34,15 @@ python evaluate.py
 Beklenen baseline: Val AUC ~0.75-0.82, Test AUC ~0.72-0.80.
 
 -------------------------------
-# UI KISMINI DENEMEK İÇİN (geçici)
+# ARAYÜZ ÇALIŞTIRMA ADIMLARI
 
-# 1) cd static
+# 1) pip install -r requirements.txt
 
-# 2) python -m http.server 8000
+# put best_image.pt / best_tabular.pt / best_fused.pt / tabular_preprocessor.pkl in checkpoints/
 
-# 3) Browser aç ve şuraya git: http://localhost:8000
+# 2) python run_api.py          # or: uvicorn app.main:app --reload
+
+# 3) open http://127.0.0.1:8000/
 
 -------------------------------
 # GÜNCELLENMİŞ HALİ
