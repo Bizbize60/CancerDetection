@@ -51,14 +51,32 @@ label, button, #accordionBtn {
     user-select: none;
 }
  
-/* Heatmap Gradient Legend */
+/* Heatmap Gradient Legend (Jet Colormap) */
 .heatmap-gradient {
-    background: linear-gradient(to bottom, #7f0000, #dc2626, #f97316, #fecaca, #ffffff);
+    background: linear-gradient(to bottom, 
+        #800000, /* dark red (1.0) */
+        #ff0000, /* red */
+        #ff8000, /* orange */
+        #ffff00, /* yellow */
+        #00ff00, /* green */
+        #00ffff, /* cyan */
+        #0000ff, /* blue */
+        #000080  /* dark blue (0.0) */
+    );
 }
  
 @media (max-width: 1024px) {
     .heatmap-gradient {
-        background: linear-gradient(to right, #ffffff, #fecaca, #f97316, #dc2626, #7f0000);
+        background: linear-gradient(to right, 
+            #000080, /* dark blue (0.0) */
+            #0000ff, /* blue */
+            #00ffff, /* cyan */
+            #00ff00, /* green */
+            #ffff00, /* yellow */
+            #ff8000, /* orange */
+            #ff0000, /* red */
+            #800000  /* dark red (1.0) */
+        );
     }
 }
  
