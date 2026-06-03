@@ -1,0 +1,35 @@
+=== TEST RESULTS (Tabular only | no TTA) ===
+Test size: 704
+
+ROC-AUC: 0.7891
+
+Threshold secimi val set uzerinde yapildi.
+
+--- Default 0.5 (threshold=0.500) ---
+  Sensitivity: 0.8261
+  Specificity: 0.5654
+  Precision:   0.5507
+  F1:          0.6609
+  Confusion: TN=242 FP=186 FN=48 TP=228
+  FN (kaçırılan kanser): 48
+--- Youden J (threshold=0.352) ---
+  Sensitivity: 0.8877
+  Specificity: 0.4953
+  Precision:   0.5315
+  F1:          0.6649
+  Confusion: TN=212 FP=216 FN=31 TP=245
+  FN (kaçırılan kanser): 31
+--- Sensitivity >= 0.90 (threshold=0.368) ---
+  Sensitivity: 0.8877
+  Specificity: 0.5023
+  Precision:   0.5349
+  F1:          0.6676
+  Confusion: TN=215 FP=213 FN=31 TP=245
+  FN (kaçırılan kanser): 31
+--- Sensitivity >= 0.95 (threshold=0.352) ---
+  Sensitivity: 0.8877
+  Specificity: 0.4953
+  Precision:   0.5315
+  F1:          0.6649
+  Confusion: TN=212 FP=216 FN=31 TP=245
+  FN (kaçırılan kanser): 31

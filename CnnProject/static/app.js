@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const accordionContent = document.getElementById('accordionContent');
     const accordionIcon = document.getElementById('accordionIcon');
     const techActiveMode = document.getElementById('techActiveMode');
-
+ 
     // Heatmap Elements
     const spatialHeatmapSection = document.getElementById('spatialHeatmapSection');
     const heatmapEmptyState = document.getElementById('heatmapEmptyState');
@@ -75,13 +75,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const heatmapOverlayImage = document.getElementById('heatmapOverlayImage');
     const heatmapDemoBadge = document.getElementById('heatmapDemoBadge');
     const heatmapMockOverlay = document.getElementById('heatmapMockOverlay');
-
+    const heatmapSpatialImage = document.getElementById('heatmapSpatialImage');
+    const tabGradCam = document.getElementById('tabGradCam');
+    const tabSpatial = document.getElementById('tabSpatial');
+ 
+    // --- Config ---
+    // When false (default for the real FastAPI demo), API errors are shown to
+    // the user and NO mock data is used. Set true only for offline UI testing.
+    const USE_MOCK_ON_API_FAILURE = false;
+ 
     // State Variables
     let currentMode = 'fused';
     let selectedImageFile = null;
     let selectedCsvFile = null;
     let csvRowCount = 0; // Number of data rows
-
+    let activeHeatmapTab = 'gradcam'; // 'gradcam' | 'spatial'
+ 
+    // --- Heatmap Tab Toggle ---
+    function switchHeatmapTab(tab) {
+        activeHeatmapTab = tab;
+        if (tab === 'gradcam') {
+            heatmapOverlayImage.classList.remove('hidden');
+            heatmapSpatialImage.classList.add('hidden');
+            tabGradCam.className = tabGradCam.className.replace('heatmap-tab-inactive', 'heatmap-tab-active');
+            tabSpatial.className  = tabSpatial.className.replace('heatmap-tab-active', 'heatmap-tab-inactive');
+        } else {
+            heatmapSpatialImage.classList.remove('hidden');
+            heatmapOverlayImage.classList.add('hidden');
+            tabSpatial.className  = tabSpatial.className.replace('heatmap-tab-inactive', 'heatmap-tab-active');
+            tabGradCam.className  = tabGradCam.className.replace('heatmap-tab-active', 'heatmap-tab-inactive');
+        }
+    }
+ 
+    tabGradCam.addEventListener('click', () => { if (!tabGradCam.disabled) switchHeatmapTab('gradcam'); });
+    tabSpatial.addEventListener('click',  () => { if (!tabSpatial.disabled)  switchHeatmapTab('spatial'); });
+ 
     // --- Mode Change Logic ---
     function updateModeVisibility() {
         if (currentMode === 'image') {
@@ -100,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateHeatmapVisibility();
         formErrorMsg.classList.add('hidden');
     }
-
+ 
     function updateHeatmapVisibility() {
         if (currentMode === 'tabular') {
             spatialHeatmapSection.style.display = 'none';
@@ -108,14 +136,14 @@ document.addEventListener('DOMContentLoaded', () => {
             spatialHeatmapSection.style.display = 'block';
         }
     }
-
+ 
     modeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             currentMode = e.target.value;
             updateModeVisibility();
         });
     });
-
+ 
     // --- Image Upload Logic ---
     
     // Trigger file input on click
@@ -124,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
             imageInput.click();
         }
     });
-
+ 
     // Drag and Drop
     imageDropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -140,14 +168,14 @@ document.addEventListener('DOMContentLoaded', () => {
             handleImageFile(e.dataTransfer.files[0]);
         }
     });
-
+ 
     // File Input Change
     imageInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files.length > 0) {
             handleImageFile(e.target.files[0]);
         }
     });
-
+ 
     function handleImageFile(file) {
         if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
             showError('Please upload only PNG or JPEG images.');
@@ -156,11 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         selectedImageFile = file;
         formErrorMsg.classList.add('hidden');
-
+ 
         // Update UI info
         imageFileName.textContent = file.name;
         imageFileSize.textContent = formatBytes(file.size);
-
+ 
         // Preview Image
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -171,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         reader.readAsDataURL(file);
     }
-
+ 
     removeImageBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         selectedImageFile = null;
@@ -180,17 +208,17 @@ document.addEventListener('DOMContentLoaded', () => {
         imagePreviewContainer.classList.remove('flex');
         imageUploadContent.classList.remove('hidden');
     });
-
-
+ 
+ 
     // --- CSV Upload Logic ---
-
+ 
     // Trigger file input on click
     csvDropZone.addEventListener('click', (e) => {
         if(e.target !== removeCsvBtn && !removeCsvBtn.contains(e.target)) {
             csvInput.click();
         }
     });
-
+ 
     // Drag and Drop
     csvDropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -206,36 +234,36 @@ document.addEventListener('DOMContentLoaded', () => {
             handleCsvFile(e.dataTransfer.files[0]);
         }
     });
-
+ 
     // File Input Change
     csvInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files.length > 0) {
             handleCsvFile(e.target.files[0]);
         }
     });
-
+ 
     function handleCsvFile(file) {
         // Some systems don't have perfect mime types for CSV
         if (file.name.split('.').pop().toLowerCase() !== 'csv' && file.type !== 'text/csv') {
             showError('Please upload a valid CSV file.');
             return;
         }
-
+ 
         selectedCsvFile = file;
         formErrorMsg.classList.add('hidden');
-
+ 
         // Update UI info
         csvFileName.textContent = file.name;
         csvFileSize.textContent = formatBytes(file.size);
-
+ 
         csvUploadContent.classList.add('hidden');
         csvFileInfoContainer.classList.remove('hidden');
         csvFileInfoContainer.classList.add('flex');
-
+ 
         // Parse CSV for preview
         readCsvPreview(file);
     }
-
+ 
     removeCsvBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         selectedCsvFile = null;
@@ -246,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
         csvUploadContent.classList.remove('hidden');
         csvPreviewContainer.classList.add('hidden');
     });
-
+ 
     function readCsvPreview(file) {
         const reader = new FileReader();
         
@@ -258,14 +286,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (lines.length === 0) {
                     throw new Error("Empty CSV file");
                 }
-
+ 
                 // Simple comma split
                 const headers = lines[0].split(',');
                 csvRowCount = lines.length - 1;
-
+ 
                 // Render Header
                 csvPreviewHead.innerHTML = `<tr>${headers.map(h => `<th class="px-3 py-2 font-medium">${h}</th>`).join('')}</tr>`;
-
+ 
                 // Render first 5 rows
                 const maxRows = Math.min(5, lines.length - 1);
                 let bodyHtml = '';
@@ -276,16 +304,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     </tr>`;
                 }
                 csvPreviewBody.innerHTML = bodyHtml;
-
+ 
                 csvPreviewContainer.classList.remove('hidden');
                 csvErrorMsg.classList.add('hidden');
-
+ 
                 if (csvRowCount > 1) {
                     csvRowCountInfo.classList.remove('hidden');
                 } else {
                     csvRowCountInfo.classList.add('hidden');
                 }
-
+ 
             } catch (err) {
                 console.error(err);
                 csvErrorMsg.classList.remove('hidden');
@@ -294,14 +322,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 csvPreviewBody.innerHTML = '';
             }
         };
-
+ 
         reader.onerror = () => {
             csvErrorMsg.classList.remove('hidden');
         };
-
+ 
         reader.readAsText(file);
     }
-
+ 
     // --- Heatmap Logic ---
     function setHeatmapLoading(isLoading) {
         if (currentMode === 'tabular') return;
@@ -320,8 +348,9 @@ document.addEventListener('DOMContentLoaded', () => {
             heatmapLoadingState.classList.remove('flex');
         }
     }
-
+ 
     function resetHeatmap() {
+        switchHeatmapTab('gradcam');
         heatmapLoadingState.classList.add('hidden');
         heatmapLoadingState.classList.remove('flex');
         heatmapResultContent.classList.add('hidden');
@@ -331,56 +360,75 @@ document.addEventListener('DOMContentLoaded', () => {
         heatmapEmptyState.classList.remove('hidden');
         heatmapEmptyState.classList.add('flex');
     }
-
+ 
     function displayHeatmap(data) {
         if (currentMode === 'tabular') return;
         
         heatmapEmptyState.classList.add('hidden');
         heatmapEmptyState.classList.remove('flex');
         
-        if (data.overlay_url || data.heatmap_url) {
+        const hasGradCam  = !!(data.overlay_url || data.heatmap_url);
+        const hasSpatial  = !!data.spatial_attention_url;
+ 
+        if (hasGradCam || hasSpatial) {
             heatmapResultContent.classList.remove('hidden');
             heatmapResultContent.classList.add('flex');
-            
             heatmapDemoBadge.classList.add('hidden');
             heatmapMockOverlay.classList.add('hidden');
-            
-            // Try to set original image if available locally
+ 
+            // Original mammography
             if (imagePreview.src) {
                 heatmapOriginalImage.src = imagePreview.src;
             }
-            
-            heatmapOverlayImage.src = data.overlay_url || data.heatmap_url;
-            heatmapOverlayImage.classList.remove('hidden');
+ 
+            // Grad-CAM panel
+            if (hasGradCam) {
+                heatmapOverlayImage.src = data.overlay_url || data.heatmap_url;
+                tabGradCam.disabled = false;
+            } else {
+                tabGradCam.disabled = true;
+            }
+ 
+            // Spatial Attention panel
+            if (hasSpatial) {
+                heatmapSpatialImage.src = data.spatial_attention_url;
+                tabSpatial.disabled = false;
+            } else {
+                tabSpatial.disabled = true;
+            }
+ 
+            // Default to Grad-CAM tab (or spatial if only spatial available)
+            switchHeatmapTab(hasGradCam ? 'gradcam' : 'spatial');
+ 
         } else {
             heatmapMissingMessage.classList.remove('hidden');
             heatmapMissingMessage.classList.add('flex');
         }
     }
-
+ 
     function displayMockHeatmap() {
         if (currentMode === 'tabular') return;
         
         heatmapEmptyState.classList.add('hidden');
         heatmapEmptyState.classList.remove('flex');
-        
         heatmapResultContent.classList.remove('hidden');
         heatmapResultContent.classList.add('flex');
         
         if (imagePreview.src) {
             heatmapOriginalImage.src = imagePreview.src;
-            heatmapOverlayImage.src = imagePreview.src; // Base image for mock
-            heatmapOverlayImage.classList.remove('hidden');
-            
+            heatmapOverlayImage.src = imagePreview.src;
             heatmapDemoBadge.classList.remove('hidden');
             heatmapMockOverlay.classList.remove('hidden');
         } else {
             heatmapMissingMessage.classList.remove('hidden');
             heatmapMissingMessage.classList.add('flex');
         }
+        // Mock sadece Grad-CAM tabında gösterilir
+        tabSpatial.disabled = true;
+        switchHeatmapTab('gradcam');
     }
-
-
+ 
+ 
     // --- Accordion Logic ---
     accordionBtn.addEventListener('click', () => {
         accordionContent.classList.toggle('hidden');
@@ -390,11 +438,11 @@ document.addEventListener('DOMContentLoaded', () => {
             accordionIcon.style.transform = 'rotate(180deg)';
         }
     });
-
+ 
     // --- Form Submission & Prediction Logic ---
     predictionForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
+ 
         // Validate
         if (currentMode === 'image' || currentMode === 'fused') {
             if (!selectedImageFile) {
@@ -408,49 +456,78 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
         }
-
+ 
         formErrorMsg.classList.add('hidden');
         setLoadingState(true);
-        setHeatmapLoading(true);
-
+ 
+        // Heatmap: show loading for image/fused, reset/hide for tabular.
+        if (currentMode === 'tabular') {
+            resetHeatmap();
+        } else {
+            setHeatmapLoading(true);
+        }
+ 
         // Prepare FormData
         const formData = new FormData();
         formData.append('mode', currentMode);
         if (selectedImageFile) formData.append('image', selectedImageFile);
         if (selectedCsvFile) formData.append('csv_file', selectedCsvFile);
-
+ 
         try {
-            // Actual API Call (will likely fail if no backend)
-            // const response = await fetch('/api/predict', { method: 'POST', body: formData });
-            // if (!response.ok) throw new Error('API Error');
-            // const data = await response.json();
-            
-            // Simulating API Call
-            const data = await mockApiCall(currentMode, csvRowCount);
+            // Real API call (API-first).
+            const response = await fetch('/api/predict', {
+                method: 'POST',
+                body: formData,
+            });
+ 
+            if (!response.ok) {
+                // Try to extract a clean error message from the JSON body.
+                let detail = `Prediction failed (HTTP ${response.status}).`;
+                try {
+                    const errBody = await response.json();
+                    if (errBody && errBody.detail) detail = errBody.detail;
+                } catch (_) { /* non-JSON error body */ }
+                throw new Error(detail);
+            }
+ 
+            const data = await response.json();
             displayResult(data);
-            
-            if (data.overlay_url || data.heatmap_url) {
+ 
+            // Heatmap only for image / fused modes.
+            if (currentMode === 'image' || currentMode === 'fused') {
                 displayHeatmap(data);
             } else {
-                displayMockHeatmap();
+                resetHeatmap();
             }
-
+ 
         } catch (error) {
             console.error(error);
-            showError('Prediction failed. Falling back to mock data...');
-            // Fallback to mock on error
-            setTimeout(async () => {
+ 
+            if (USE_MOCK_ON_API_FAILURE) {
+                // Dev-only fallback to mock so the UI can be demoed offline.
+                showError('API unavailable — showing mock data (dev mode).');
                 const mockData = await mockApiCall(currentMode, csvRowCount);
                 displayResult(mockData);
-                displayMockHeatmap();
-                formErrorMsg.classList.add('hidden'); // Clear error msg after fallback success
-            }, 1000);
+                if (currentMode === 'image' || currentMode === 'fused') {
+                    displayMockHeatmap();
+                } else {
+                    resetHeatmap();
+                }
+                setTimeout(() => formErrorMsg.classList.add('hidden'), 2500);
+            } else {
+                // Real-API mode: surface the error, do not fabricate results.
+                showError(error.message || 'Prediction failed. Please try again.');
+                if (currentMode !== 'tabular') {
+                    setHeatmapLoading(false);
+                    resetHeatmap();
+                }
+            }
         } finally {
             setLoadingState(false);
             setHeatmapLoading(false);
         }
     });
-
+ 
     function displayResult(data) {
         resultEmptyState.classList.add('hidden');
         
@@ -477,31 +554,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             });
             batchResultBody.innerHTML = tbodyHtml;
-
+ 
         } else {
             // Single Result
             batchResultContent.classList.add('hidden');
             batchResultContent.classList.remove('flex');
             resultContent.classList.remove('hidden');
             resultContent.classList.add('flex');
-
+ 
             resPredictedClass.textContent = data.predicted_class;
             resProbabilityText.textContent = `${(data.probability * 100).toFixed(2)}%`;
             resThreshold.textContent = data.threshold;
             resInterpretation.textContent = data.interpretation;
-
+ 
             // Update Progress Bar
             setTimeout(() => {
                 resProgressBar.style.width = `${data.probability * 100}%`;
                 resProgressBar.className = `h-2.5 rounded-full transition-all duration-1000 ease-out ${getProgressBarColor(data.risk_level)}`;
             }, 50);
-
+ 
             // Update Badge
             resRiskBadge.textContent = data.risk_level;
             resRiskBadge.className = `px-3 py-1 rounded-full text-sm font-semibold border shadow-sm ${getRiskBadgeColorClass(data.risk_level)}`;
         }
     }
-
+ 
     // --- Mock API Logic ---
     function mockApiCall(mode, rowCount) {
         return new Promise((resolve) => {
@@ -535,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let level = 'Moderate';
                 let cls = 'Moderate Risk';
                 let interp = "The model predicts intermediate malignancy risk. Further investigation is recommended.";
-
+ 
                 if (p > 0.75) {
                     level = 'High';
                     cls = 'Malignant Risk';
@@ -545,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cls = 'Benign / Low Risk';
                     interp = "The model predicts low malignancy risk. Routine screening is advised.";
                 }
-
+ 
                 resolve({
                     mode: mode,
                     probability: p,
@@ -555,11 +632,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     interpretation: interp,
                     disclaimer: "This AI result is for research and decision-support purposes only."
                 });
-
+ 
             }, 1500); // simulate delay
         });
     }
-
+ 
     // --- Utility Functions ---
     function formatBytes(bytes, decimals = 2) {
         if (bytes === 0) return '0 Bytes';
@@ -569,12 +646,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
-
+ 
     function showError(msg) {
         formErrorMsg.textContent = msg;
         formErrorMsg.classList.remove('hidden');
     }
-
+ 
     function setLoadingState(isLoading) {
         predictBtn.disabled = isLoading;
         if (isLoading) {
@@ -587,26 +664,26 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSpinner.classList.add('hidden');
         }
     }
-
+ 
     function getRiskColorClass(level) {
         if (level === 'High') return 'bg-red-100 text-red-700 border-red-200';
         if (level === 'Moderate') return 'bg-amber-100 text-amber-700 border-amber-200';
         return 'bg-green-100 text-green-700 border-green-200';
     }
-
+ 
     function getRiskBadgeColorClass(level) {
         if (level === 'High') return 'bg-red-50 text-red-600 border-red-200';
         if (level === 'Moderate') return 'bg-amber-50 text-amber-600 border-amber-200';
         return 'bg-green-50 text-green-600 border-green-200';
     }
-
+ 
     function getProgressBarColor(level) {
         if (level === 'High') return 'bg-red-500';
         if (level === 'Moderate') return 'bg-amber-500';
         return 'bg-green-500';
     }
-
+ 
     // Initialize UI
     updateModeVisibility();
-
+ 
 });

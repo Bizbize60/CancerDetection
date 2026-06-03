@@ -25,11 +25,25 @@ class SpatialAttention(nn.Module):
         self.bn = nn.BatchNorm2d(1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # NOTE: davranış aynen korunur — eğitim/değerlendirme bozulmaz.
         avg_out = x.mean(dim=1, keepdim=True)
         max_out, _ = x.max(dim=1, keepdim=True)
         scale = torch.cat([avg_out, max_out], dim=1)
         scale = torch.sigmoid(self.bn(self.conv(scale)))
         return x * scale
+
+    # --- Heatmap eklentileri (eğitim/forward'u ETKİLEMEZ) -----------------
+    def get_attention_map(self, x: torch.Tensor) -> torch.Tensor:
+        """Sadece sigmoid attention haritasını döndürür → [B, 1, H, W]."""
+        avg_out = x.mean(dim=1, keepdim=True)
+        max_out, _ = x.max(dim=1, keepdim=True)
+        scale = torch.cat([avg_out, max_out], dim=1)
+        return torch.sigmoid(self.bn(self.conv(scale)))
+
+    def forward_with_attention(self, x: torch.Tensor):
+        """attended_features, attention_map döndürür."""
+        attn = self.get_attention_map(x)
+        return x * attn, attn
 
 
 class ResNet50Backbone(nn.Module):
@@ -65,6 +79,13 @@ class ImageBranch(nn.Module):
         feat_map = self.attention(feat_map)
         pooled   = self.pool(feat_map)
         return self.proj(pooled)
+
+    def forward_with_attention(self, x: torch.Tensor):
+        """forward(x) ile sayısal olarak aynı embedding'i + attention haritasını döndürür."""
+        feat_map = self.backbone(x)
+        attended, attn = self.attention.forward_with_attention(feat_map)
+        pooled = self.pool(attended)
+        return self.proj(pooled), attn
 
 
 class ClassificationHead(nn.Module):
@@ -103,6 +124,11 @@ class ImageOnlyModel(nn.Module):
         # bu modda kullanılmaz.
         img_emb = self.image_branch(images)
         return self.head(img_emb)
+
+    def forward_with_attention(self, images, cat_inputs=None, num_inputs=None):
+        """logits, attention_map döndürür (cat/num imza uyumu için, kullanılmaz)."""
+        img_emb, attn = self.image_branch.forward_with_attention(images)
+        return self.head(img_emb), attn
 
     def freeze_backbone(self):
         for p in self.image_branch.backbone.parameters():
@@ -167,6 +193,16 @@ class BreastCancerModel(nn.Module):
         else:
             fused = img_emb
         return self.head(fused)
+
+    def forward_with_attention(self, images, cat_inputs=None, num_inputs=None):
+        """logits, attention_map döndürür. forward() ile aynı füzyon mantığı."""
+        img_emb, attn = self.image_branch.forward_with_attention(images)
+        if self.use_tabular and cat_inputs is not None and num_inputs is not None:
+            tab_emb = self.tabular_branch(cat_inputs, num_inputs)
+            fused   = torch.cat([img_emb, tab_emb], dim=1)
+        else:
+            fused = img_emb
+        return self.head(fused), attn
 
     def freeze_backbone(self):
         for p in self.image_branch.backbone.parameters():

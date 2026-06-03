@@ -1,9 +1,9 @@
 /* Custom Animations & Styles */
-
+ 
 .fade-in {
     animation: fadeIn 0.4s ease-in-out forwards;
 }
-
+ 
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -14,56 +14,75 @@
         transform: translateY(0);
     }
 }
-
+ 
 /* Drag and Drop Active States */
 .drag-active {
     border-color: #0ea5e9 !important; /* medical-500 */
     background-color: #f0f9ff !important; /* medical-50 */
 }
-
+ 
 /* Custom Scrollbar for CSV Table Preview */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
-
+ 
 ::-webkit-scrollbar-track {
     background: #f1f5f9; 
     border-radius: 4px;
 }
-
+ 
 ::-webkit-scrollbar-thumb {
     background: #cbd5e1; 
     border-radius: 4px;
 }
-
+ 
 ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8; 
 }
-
+ 
 /* Progress bar transition */
 #resProgressBar {
     transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
+ 
 /* Prevent text selection on clickable elements */
 label, button, #accordionBtn {
     user-select: none;
 }
-
+ 
 /* Heatmap Gradient Legend */
 .heatmap-gradient {
     background: linear-gradient(to bottom, #7f0000, #dc2626, #f97316, #fecaca, #ffffff);
 }
-
+ 
 @media (max-width: 1024px) {
     .heatmap-gradient {
         background: linear-gradient(to right, #ffffff, #fecaca, #f97316, #dc2626, #7f0000);
     }
 }
-
+ 
 /* Mock Heatmap Overlay */
 .mock-heatmap-overlay {
     background: radial-gradient(circle at 58% 42%, rgba(127, 0, 0, 0.75) 0%, rgba(239, 68, 68, 0.55) 18%, rgba(249, 115, 22, 0.30) 35%, rgba(255, 255, 255, 0) 60%);
     mix-blend-mode: screen;
+}
+ 
+/* Heatmap Tab Toggle */
+.heatmap-tab-active {
+    background-color: #0ea5e9;
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(14, 165, 233, 0.30);
+}
+.heatmap-tab-inactive {
+    background-color: transparent;
+    color: #64748b;
+}
+.heatmap-tab-inactive:hover:not(:disabled) {
+    background-color: #e2e8f0;
+    color: #334155;
+}
+.heatmap-tab-inactive:disabled {
+    opacity: 0.40;
+    cursor: not-allowed;
 }

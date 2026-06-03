@@ -25,7 +25,7 @@
         }
     </script>
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -37,13 +37,13 @@
         <!-- Left Brand Logo Area -->
         <div class="absolute left-4 sm:left-6 lg:left-8 top-1/2 -translate-y-1/2 hidden xl:flex items-center gap-3">
             <img 
-                src="assets/mammofusion-icon.png" 
+                src="/static/assets/mammofusion-icon.png" 
                 alt="MammoFusion Icon" 
                 class="h-24 w-24 object-contain"
             >
 
             <img 
-                src="assets/mammofusion-wordmark.png" 
+                src="/static/assets/mammofusion-wordmark.png" 
                 alt="MammoFusion Wordmark" 
                 class="h-[72px] w-auto max-w-[260px] object-contain"
             >
@@ -181,11 +181,21 @@
                                 </div>
                             </div>
 
-                            <!-- Heatmap Overlay -->
+                            <!-- Heatmap Overlay with Tab Toggle -->
                             <div class="flex-1 flex flex-col items-center">
-                                <p class="text-xs text-slate-500 font-medium mb-2 text-center w-full">Attention Heatmap</p>
+                                <!-- Tab buttons -->
+                                <div class="flex gap-1 mb-2 bg-slate-100 rounded-lg p-0.5 w-full">
+                                    <button id="tabGradCam" class="heatmap-tab-active flex-1 text-xs font-semibold py-1 px-2 rounded-md transition-all duration-200 border-0 cursor-pointer">
+                                        Grad-CAM
+                                    </button>
+                                    <button id="tabSpatial" class="heatmap-tab-inactive flex-1 text-xs font-semibold py-1 px-2 rounded-md transition-all duration-200 border-0 cursor-pointer">
+                                        Spatial Attention
+                                    </button>
+                                </div>
+                                <!-- Image container -->
                                 <div class="w-full bg-slate-950 rounded-lg p-1 border border-slate-200 shadow-inner flex items-center justify-center aspect-[4/5] max-h-[300px] relative overflow-hidden" id="heatmapOverlayContainer">
-                                    <img id="heatmapOverlayImage" class="max-w-full max-h-full object-contain rounded" alt="Spatial attention heatmap overlay">
+                                    <img id="heatmapOverlayImage" class="max-w-full max-h-full object-contain rounded" alt="Grad-CAM attention heatmap">
+                                    <img id="heatmapSpatialImage" class="hidden max-w-full max-h-full object-contain rounded" alt="Spatial attention heatmap">
                                     <div id="heatmapMockOverlay" class="hidden absolute inset-0 mock-heatmap-overlay rounded pointer-events-none"></div>
                                 </div>
                             </div>
@@ -439,6 +449,6 @@
         </div>
     </footer>
 
-    <script src="app.js"></script>
+    <script src="/static/app.js"></script>
 </body>
 </html>
