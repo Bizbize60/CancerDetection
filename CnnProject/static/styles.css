@@ -50,3 +50,20 @@
 label, button, #accordionBtn {
     user-select: none;
 }
+
+/* Heatmap Gradient Legend */
+.heatmap-gradient {
+    background: linear-gradient(to bottom, #7f0000, #dc2626, #f97316, #fecaca, #ffffff);
+}
+
+@media (max-width: 1024px) {
+    .heatmap-gradient {
+        background: linear-gradient(to right, #ffffff, #fecaca, #f97316, #dc2626, #7f0000);
+    }
+}
+
+/* Mock Heatmap Overlay */
+.mock-heatmap-overlay {
+    background: radial-gradient(circle at 58% 42%, rgba(127, 0, 0, 0.75) 0%, rgba(239, 68, 68, 0.55) 18%, rgba(249, 115, 22, 0.30) 35%, rgba(255, 255, 255, 0) 60%);
+    mix-blend-mode: screen;
+}

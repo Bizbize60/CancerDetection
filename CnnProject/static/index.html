@@ -137,6 +137,76 @@
                         </div>
                     </div>
 
+                    <!-- Spatial Attention Heatmap Section -->
+                    <div id="spatialHeatmapSection" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-all duration-300">
+                        <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-fire text-medical-500"></i> Spatial Attention Heatmap
+                        </h2>
+                        <p class="text-sm text-slate-500 mb-4">Visual explanation of the image regions emphasized by the model.</p>
+                        
+                        <!-- Empty State -->
+                        <div id="heatmapEmptyState" class="flex flex-col items-center justify-center py-6 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+                            <i class="fa-solid fa-eye-slash text-3xl text-slate-300 mb-2"></i>
+                            <h3 class="text-slate-600 font-medium text-sm">No heatmap generated yet</h3>
+                            <p class="text-xs text-slate-400 mt-1">Run an image-based prediction to visualize the model’s spatial attention.</p>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="heatmapLoadingState" class="hidden flex-col items-center justify-center py-8 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+                            <svg class="animate-spin h-8 w-8 text-medical-500 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <p class="text-sm text-slate-600 font-medium">Generating attention heatmap...</p>
+                        </div>
+
+                        <!-- Missing Message -->
+                        <div id="heatmapMissingMessage" class="hidden flex-col items-center justify-center py-6 text-center border border-slate-200 rounded-xl bg-slate-50">
+                            <i class="fa-solid fa-circle-exclamation text-amber-500 text-2xl mb-2"></i>
+                            <p class="text-sm text-slate-600">Heatmap output was not returned by the API.</p>
+                        </div>
+
+                        <!-- Result Content -->
+                        <div id="heatmapResultContent" class="hidden flex-col lg:flex-row gap-4 relative">
+                            <!-- Demo Badge -->
+                            <div id="heatmapDemoBadge" class="hidden absolute top-2 right-2 z-10 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide shadow-md">
+                                Demo Heatmap
+                            </div>
+
+                            <!-- Original Image -->
+                            <div class="flex-1 flex flex-col items-center">
+                                <p class="text-xs text-slate-500 font-medium mb-2 text-center w-full">Original Mammography</p>
+                                <div class="w-full bg-slate-950 rounded-lg p-1 border border-slate-200 shadow-inner flex items-center justify-center aspect-[4/5] max-h-[300px]">
+                                    <img id="heatmapOriginalImage" class="max-w-full max-h-full object-contain rounded" alt="Original mammography image">
+                                </div>
+                            </div>
+
+                            <!-- Heatmap Overlay -->
+                            <div class="flex-1 flex flex-col items-center">
+                                <p class="text-xs text-slate-500 font-medium mb-2 text-center w-full">Attention Heatmap</p>
+                                <div class="w-full bg-slate-950 rounded-lg p-1 border border-slate-200 shadow-inner flex items-center justify-center aspect-[4/5] max-h-[300px] relative overflow-hidden" id="heatmapOverlayContainer">
+                                    <img id="heatmapOverlayImage" class="max-w-full max-h-full object-contain rounded" alt="Spatial attention heatmap overlay">
+                                    <div id="heatmapMockOverlay" class="hidden absolute inset-0 mock-heatmap-overlay rounded pointer-events-none"></div>
+                                </div>
+                            </div>
+
+                            <!-- Attention Legend -->
+                            <div class="flex flex-row lg:flex-col items-center lg:w-12 pt-4 lg:pt-0">
+                                <p class="text-[10px] text-slate-500 font-medium mb-1 lg:mb-2 text-center w-full whitespace-nowrap lg:whitespace-normal">Weight</p>
+                                <div class="flex flex-row lg:flex-col items-center h-3 lg:h-full w-full lg:w-4 heatmap-gradient rounded-full shadow-inner border border-slate-200 order-2 lg:order-none"></div>
+                                <div class="flex flex-row lg:flex-col justify-between h-full text-[10px] text-slate-500 font-mono font-medium ml-0 lg:ml-1 mt-1 lg:mt-0 w-full lg:w-auto order-1 lg:order-none px-2 lg:px-0 py-0 lg:py-2">
+                                    <span>1.0</span>
+                                    <span class="hidden lg:inline">0.8</span>
+                                    <span class="hidden lg:inline">0.6</span>
+                                    <span>0.5</span>
+                                    <span class="hidden lg:inline">0.4</span>
+                                    <span class="hidden lg:inline">0.2</span>
+                                    <span>0.0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- CSV Upload Section -->
                     <div id="csvUploadSection" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-all duration-300">
                         <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">

@@ -65,6 +65,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const accordionIcon = document.getElementById('accordionIcon');
     const techActiveMode = document.getElementById('techActiveMode');
 
+    // Heatmap Elements
+    const spatialHeatmapSection = document.getElementById('spatialHeatmapSection');
+    const heatmapEmptyState = document.getElementById('heatmapEmptyState');
+    const heatmapLoadingState = document.getElementById('heatmapLoadingState');
+    const heatmapMissingMessage = document.getElementById('heatmapMissingMessage');
+    const heatmapResultContent = document.getElementById('heatmapResultContent');
+    const heatmapOriginalImage = document.getElementById('heatmapOriginalImage');
+    const heatmapOverlayImage = document.getElementById('heatmapOverlayImage');
+    const heatmapDemoBadge = document.getElementById('heatmapDemoBadge');
+    const heatmapMockOverlay = document.getElementById('heatmapMockOverlay');
+
     // State Variables
     let currentMode = 'fused';
     let selectedImageFile = null;
@@ -86,7 +97,16 @@ document.addEventListener('DOMContentLoaded', () => {
             csvUploadSection.style.display = 'block';
             techActiveMode.textContent = 'Image + Tabular Fusion';
         }
+        updateHeatmapVisibility();
         formErrorMsg.classList.add('hidden');
+    }
+
+    function updateHeatmapVisibility() {
+        if (currentMode === 'tabular') {
+            spatialHeatmapSection.style.display = 'none';
+        } else {
+            spatialHeatmapSection.style.display = 'block';
+        }
     }
 
     modeRadios.forEach(radio => {
@@ -282,6 +302,84 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsText(file);
     }
 
+    // --- Heatmap Logic ---
+    function setHeatmapLoading(isLoading) {
+        if (currentMode === 'tabular') return;
+        
+        if (isLoading) {
+            heatmapEmptyState.classList.add('hidden');
+            heatmapEmptyState.classList.remove('flex');
+            heatmapResultContent.classList.add('hidden');
+            heatmapResultContent.classList.remove('flex');
+            heatmapMissingMessage.classList.add('hidden');
+            heatmapMissingMessage.classList.remove('flex');
+            heatmapLoadingState.classList.remove('hidden');
+            heatmapLoadingState.classList.add('flex');
+        } else {
+            heatmapLoadingState.classList.add('hidden');
+            heatmapLoadingState.classList.remove('flex');
+        }
+    }
+
+    function resetHeatmap() {
+        heatmapLoadingState.classList.add('hidden');
+        heatmapLoadingState.classList.remove('flex');
+        heatmapResultContent.classList.add('hidden');
+        heatmapResultContent.classList.remove('flex');
+        heatmapMissingMessage.classList.add('hidden');
+        heatmapMissingMessage.classList.remove('flex');
+        heatmapEmptyState.classList.remove('hidden');
+        heatmapEmptyState.classList.add('flex');
+    }
+
+    function displayHeatmap(data) {
+        if (currentMode === 'tabular') return;
+        
+        heatmapEmptyState.classList.add('hidden');
+        heatmapEmptyState.classList.remove('flex');
+        
+        if (data.overlay_url || data.heatmap_url) {
+            heatmapResultContent.classList.remove('hidden');
+            heatmapResultContent.classList.add('flex');
+            
+            heatmapDemoBadge.classList.add('hidden');
+            heatmapMockOverlay.classList.add('hidden');
+            
+            // Try to set original image if available locally
+            if (imagePreview.src) {
+                heatmapOriginalImage.src = imagePreview.src;
+            }
+            
+            heatmapOverlayImage.src = data.overlay_url || data.heatmap_url;
+            heatmapOverlayImage.classList.remove('hidden');
+        } else {
+            heatmapMissingMessage.classList.remove('hidden');
+            heatmapMissingMessage.classList.add('flex');
+        }
+    }
+
+    function displayMockHeatmap() {
+        if (currentMode === 'tabular') return;
+        
+        heatmapEmptyState.classList.add('hidden');
+        heatmapEmptyState.classList.remove('flex');
+        
+        heatmapResultContent.classList.remove('hidden');
+        heatmapResultContent.classList.add('flex');
+        
+        if (imagePreview.src) {
+            heatmapOriginalImage.src = imagePreview.src;
+            heatmapOverlayImage.src = imagePreview.src; // Base image for mock
+            heatmapOverlayImage.classList.remove('hidden');
+            
+            heatmapDemoBadge.classList.remove('hidden');
+            heatmapMockOverlay.classList.remove('hidden');
+        } else {
+            heatmapMissingMessage.classList.remove('hidden');
+            heatmapMissingMessage.classList.add('flex');
+        }
+    }
+
 
     // --- Accordion Logic ---
     accordionBtn.addEventListener('click', () => {
@@ -313,6 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         formErrorMsg.classList.add('hidden');
         setLoadingState(true);
+        setHeatmapLoading(true);
 
         // Prepare FormData
         const formData = new FormData();
@@ -329,6 +428,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Simulating API Call
             const data = await mockApiCall(currentMode, csvRowCount);
             displayResult(data);
+            
+            if (data.overlay_url || data.heatmap_url) {
+                displayHeatmap(data);
+            } else {
+                displayMockHeatmap();
+            }
 
         } catch (error) {
             console.error(error);
@@ -337,10 +442,12 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(async () => {
                 const mockData = await mockApiCall(currentMode, csvRowCount);
                 displayResult(mockData);
+                displayMockHeatmap();
                 formErrorMsg.classList.add('hidden'); // Clear error msg after fallback success
             }, 1000);
         } finally {
             setLoadingState(false);
+            setHeatmapLoading(false);
         }
     });
 
